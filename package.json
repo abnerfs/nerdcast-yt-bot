@@ -19,7 +19,11 @@
   },
   "homepage": "https://github.com/abnerfs/nerdcast-yt-bot#readme",
   "dependencies": {
+    "@types/fluent-ffmpeg": "^2.1.14",
     "@types/node": "^13.11.1",
+    "@types/node-fetch": "^2.5.6",
+    "fluent-ffmpeg": "^2.1.2",
+    "node-fetch": "^2.6.0",
     "nodemon": "^2.0.3",
     "ts-node": "^8.8.2",
     "typescript": "^3.8.3"

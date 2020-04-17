@@ -47,7 +47,8 @@ const prepareImage = async (image: ImageAsset) => {
     return image;
 }
 
-const generateFilesTxt = (downloadFolder: string, images: ImageAsset[]) => {
+const generateFilesTxt = (downloadFolder: string, images: ImageAsset[]) => {    
+
     const content = images.map(x => {
         return `file ${x.path.split('\\').join('\\\\')}\r\n` + `duration ${Math.round(x.duration)}`;
     })
@@ -91,6 +92,19 @@ const downloadAssets = async (info: PodcastAssetsDownload): Promise<PodcastAsset
     await downloadFile(info.audioUrl, audioPath);
 
     const resultPath = audioPath.replace('.mp3', '.mp4');
+
+    if(images.length == 1){
+        let singleImage = images[0];
+        singleImage.duration--;
+
+        let newImage : ImageAsset = {
+            duration: 1,
+            path: singleImage.path,
+            thumb: singleImage.thumb
+        }
+        images = [singleImage, newImage];
+        console.log("Single image");
+    }
 
     const filetxt = generateFilesTxt(downloadFolder, images);
 

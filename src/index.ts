@@ -7,25 +7,38 @@ import { downloaderBot } from "./bots/downloader";
 import { rendererBot } from "./bots/renderer";
 import { uploaderBot } from './bots/uploader';
 import { infoBot } from './bots/info';
+import { videoInfoBot } from './bots/videoinfo';
 
 const start = async () => {
     console.log('App inicializado');
     // await uploaderBot.startLoginServer();
-    
-    const podcast = databaseBot.getPodcast(395054);
-    if(podcast) {
-        const info = await infoBot.getPodcastInfo(podcast);
-        const assets = await downloaderBot.downloadAssets(info);
-        await rendererBot.renderVideo(assets);
+    // return;
 
+    for (const podcast of databaseBot.listPodcastsNotUploaded()) {
+        if (podcast) {
+            const info = await infoBot.getPodcastInfo(podcast);
+            const assets = await downloaderBot.downloadAssets(info);
+            await rendererBot.renderVideo(assets);
+            const videoinfo = videoInfoBot.getVideoInfo(
+                assets.resultPath,
+                `${podcast.product_name} ${podcast.episode} - ${podcast.title} (Com imagens)`,
+                podcast.description
+                +'\r\nProduzido por Jovem Nerd, todos os direitos reservados: ' + podcast.url);
+
+            console.log(videoinfo);
+            await uploaderBot.uploadVideo({
+                }, videoinfo);
+
+            await databaseBot.setUploaded(podcast);
+        }
     }
-    // await databaseBot.updateDatabase();
+    await databaseBot.updateDatabase();
 }
 
 start()
     .then(() => {
         console.log('App ended');
     })
-    .catch((err: Error ) => {
+    .catch((err: Error) => {
         console.log(`App Error: ${err.message}, ${err.stack}`);
     })

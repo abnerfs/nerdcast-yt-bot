@@ -27,6 +27,7 @@ export interface NerdCast {
     "jump-to-time": JumpToTime;
     guests: string;
     post_type_class: string;
+    uploaded: boolean;
 }
 
 export interface PodcastExtra {
@@ -37,13 +38,13 @@ export interface PodcastExtra {
 }
 
 export interface ImageAssetDownload {
-    url: string; 
-    duration: number; 
+    url: string;
+    duration: number;
     thumb: boolean;
 }
 
 export interface ImageAsset {
-    path: string; 
+    path: string;
     duration: number;
     thumb: boolean;
 }
@@ -60,6 +61,14 @@ export interface PodcastAssets {
     resultPath: string;
     duration: number;
     filetxt: string;
+}
+
+export interface PodcastVideo {
+    resultVideoPath: string;
+    title: string;
+    description: string;
+    tags: string[];
+    privacy: 'public' | 'private' | 'unlisted';
 }
 
 export interface Insertion {

@@ -4,13 +4,10 @@ const PORT = process.env.PORT || 1122;
 
 import fetch from 'node-fetch';
 import express from 'express';
-import { APIAuth, PodcastExtra } from '../models';
+import { APIAuth, PodcastVideo } from '../models';
 import open from 'open';
 const Youtube = require('youtube-api');
 import fs from 'fs';
-
-const google = require('googleapis').google
-const youtube = google.youtube({ version: 'v3'})
 
 if(!SERVER_URI)
     throw new Error("INVALID SERVER_URI");
@@ -86,34 +83,29 @@ export type videoUploadInfo = {
     videoPath: string;
 }
 
-const uploadVideo = async (auth: APIAuth, podcastExtra: PodcastExtra) => {
+const uploadVideo = async (auth: APIAuth, videoInfo: PodcastVideo) => {
+    console.log('Uploading video...');
     Youtube.authenticate({
         type: 'oauth',
         token: auth.access_token
     });
 
     return new Promise((resolve, reject) => {
-        // const videoFileSize = fs.statSync(podcastExtra.resultVideoPath).size;
-        const videoTitle = `${podcastExtra.podcast.product_name} ${podcastExtra.podcast.episode} - ${podcastExtra.podcast.title}`;
-        const description = podcastExtra.podcast.description
-            .replace(/<[^>]*>?/gm, '')
-            .split('\\n')
-            .join('\n');
-
         Youtube.videos.insert({
             "resource": {
                 // Video title and description
                 "snippet": {
-                    "title": videoTitle,
-                    "description": description,
+                    "title": videoInfo.title,
+                    "description": videoInfo.description,
+                    "tags" : videoInfo.tags.join(' ')
                 },
                 "status": {
-                    "privacyStatus": "private"
+                    "privacyStatus": videoInfo.privacy
                 }
             }, 
             "part": "snippet,status,id", 
             "media": {
-                "body": fs.createReadStream(podcastExtra.resultVideoPath)
+                "body": fs.createReadStream(videoInfo.resultVideoPath)
             }
         }, function (err : Error, data: any) {
             if(err)

@@ -65,12 +65,37 @@ const updateDatabase = async () => {
     }
     
     const podcasts = (await getEveryPodcast()).concat(savedPodcasts);
-    fs.writeFileSync(__dirname + '/../../data/podcasts.json', JSON.stringify(podcasts), 'utf8');
+    saveDatabase(podcasts);
     return podcasts;
+}
+
+const saveDatabase = (podcasts: NerdCast[]) => {
+    fs.writeFileSync(__dirname + '/../../data/podcasts.json', JSON.stringify(podcasts), 'utf8');
+}
+
+const setUploaded = (podcast: NerdCast) => {
+    const nerdcasts = loadPodcasts()
+        .map(x => {
+            if(x.id === podcast.id)
+                x.uploaded = true;
+
+            return x;
+        });
+
+    saveDatabase(nerdcasts);
+}
+
+const listPodcastsNotUploaded = function(){
+    const nerdcasts = loadPodcasts()
+        .filter(x => !x.uploaded);
+
+    return nerdcasts;
 }
 
 export const databaseBot = {
     getPodcast,
-    updateDatabase
+    listPodcastsNotUploaded,
+    updateDatabase,
+    setUploaded
 }
 

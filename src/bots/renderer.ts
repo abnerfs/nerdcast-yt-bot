@@ -1,38 +1,48 @@
 
 import Ffmpeg from 'fluent-ffmpeg';
-import { PodcastExtra } from '../models';
+import { PodcastAssets } from '../models';
+import Sharp from 'sharp';
+import path from 'path';
+import { lookup } from 'dns';
+import { writeFileSync } from 'fs';
+import { exec, ExecException } from 'child_process';
 
-const renderVideo = async (podcast : PodcastExtra) => {
-    console.log(podcast.audioPath);
-    console.log(podcast.imagePath);
-    console.log(podcast.podcast.duration);
-    console.log(podcast.resultVideoPath);
+const videoshow = require('videoshow');
 
-    await new Promise((resolve, reject) => {
-        Ffmpeg()
-            .input(podcast.audioPath)
-            .input(podcast.imagePath)
-            .inputFPS(1)
-            .loop(podcast.podcast.duration)
-            .outputFPS(1)
-            .audioCodec('libmp3lame')
-            .videoCodec('libx264')
-            .size('1280x720')
-            .on('progress', function (progress: { percent: number }) {
-                console.log('Rendering video: ' + progress.percent.toFixed(2) + '% done');
-            })
-            .on('error', function (err) {
-                console.log('Error rendering: ' + err.message);
-                reject(err);
-            })
-            .on('end', function () {
-                console.log('Render finished !');
-                resolve();
-            })
-            .save(podcast.resultVideoPath);
+const renderVideo = async (assets : PodcastAssets) => {
+
+    await new Promise( async (resolve, reject) => {
+        console.log('Start rendering...');
+
+        let commandFfmpeg = `ffmpeg -f concat -safe 0 -i ${assets.filetxt} -i ${assets.audioPath} -acodec libmp3lame -vcodec libx264 -filter:v scale=w=1280:h=720 ${assets.resultPath} -y`;
+        console.log(commandFfmpeg);
+
+        exec(commandFfmpeg,(error, stdout, stderr) => {
+            if(error)
+                reject(error);
+        })
+        .on('start', function(commandLine: string) {
+            console.log('Spawned Ffmpeg with command: ' + commandLine);
+        })
+        .on('progress', function (progress: any) {
+            console.log('Rendering video: ' + progress + '% done');
+        })
+        .on('error', function (err: Error) {
+            console.log('Error rendering: ' + err.message);
+            reject(err);
+        })
+        .on('end', function () {
+            console.log('Render finished !');
+            resolve();
+        })
     });
 }
 
-export const botRenderer = {
+export const rendererBot = {
     renderVideo
 }
+
+
+//ffmpeg -f concat -i D:\Abner\nerdcast-yt-bot\tmp\files.txt -i D:\Abner\nerdcast-yt-bot\tmp\nerdcast_716_velho.mp3 -acodec libmp3lame -vcodec libx264 -filter:v scale=w=1280:h=720 D:\Abner\nerdcast-yt-bot\tmp\nerdcast_716_velho.mp4
+
+//ffmpeg -f concat -safe 0 -i D:\Abner\nerdcast-yt-bot\tmp\files.txt -i D:\Abner\nerdcast-yt-bot\tmp\nerdcast_716_velho.mp3 -acodec libmp3lame -vcodec libx264 -filter:v scale=w=1280:h=720 D:\Abner\nerdcast-yt-bot\tmp\nerdcast_716_velho.mp4

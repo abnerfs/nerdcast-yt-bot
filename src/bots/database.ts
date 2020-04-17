@@ -1,16 +1,16 @@
 const fetch = require('node-fetch');
 import fs from 'fs';
 import path from 'path';
-import { Podcast } from '../models';
+import { NerdCast } from '../models';
 
 const PODCASTS_PAGE = 10;
 
 const folderPath = path.join(__dirname, "../../data/");
 const filePath = path.join(folderPath, 'podcasts.json');
 
-const loadEpisodes = () => {
+const loadPodcasts = () => {
     try{
-        const podcasts = JSON.parse(fs.readFileSync(filePath, 'utf8')) as Podcast[];
+        const podcasts = JSON.parse(fs.readFileSync(filePath, 'utf8')) as NerdCast[];
         return podcasts || [];
     }
     catch(err) {
@@ -18,8 +18,8 @@ const loadEpisodes = () => {
     }
 }
 
-const getEpisode = (id: number) => {
-    const episodes = loadEpisodes();
+const getPodcast = (id: number) => {
+    const episodes = loadPodcasts();
     return episodes.find(x => x.id === id);
 }
 
@@ -28,7 +28,7 @@ const updateDatabase = async () => {
     if(!fs.existsSync(folderPath))
         fs.mkdirSync(folderPath);
 
-    const savedPodcasts = await loadEpisodes();
+    const savedPodcasts = await loadPodcasts();
     console.log('Loaded ' + savedPodcasts.length + ' podcasts from disk');
 
     const lastPodcast = savedPodcasts[0] || undefined;
@@ -37,13 +37,13 @@ const updateDatabase = async () => {
     async function getPodcastPage(page: number) {
         return fetch(`https://jovemnerd.com.br/wp-json/jovemnerd/v1/nerdcasts/?per_page=${PODCASTS_PAGE}&page=${page}`)
             .then((res : Response) => res.json())
-            .then((x : any) => x as Podcast[]);
+            .then((x : any) => x as NerdCast[]);
     }
     
     async function getEveryPodcast() {
         let page = 1;
-        let podcastsOffset : Podcast[] = [];
-        let podcasts : Podcast[] = [];
+        let podcastsOffset : NerdCast[] = [];
+        let podcasts : NerdCast[] = [];
 
         do {
             console.log(`Page: ${page}`);
@@ -70,7 +70,7 @@ const updateDatabase = async () => {
 }
 
 export const databaseBot = {
-    getEpisode,
+    getPodcast,
     updateDatabase
 }
 

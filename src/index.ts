@@ -1,15 +1,23 @@
 // import { databaseBot } from "./bots/database";
+import dotenv from 'dotenv';
+dotenv.config();
 
 import { databaseBot } from "./bots/database";
 import { downloaderBot } from "./bots/downloader";
 import { botRenderer } from "./bots/renderer";
+import { uploaderBot } from './bots/uploader';
 
 const start = async () => {
     console.log('App inicializado');
-    const episode = databaseBot.getEpisode(400964);
+    // await uploaderBot.startLoginServer();
+    
+    const episode = databaseBot.getEpisode(395408);
     if(episode) {
-        const episodePaths = await downloaderBot.downloadAssets(episode);
-        await botRenderer.renderVideo(episodePaths);
+        const episodeExtra = await downloaderBot.downloadAssets(episode);
+        await botRenderer.renderVideo(episodeExtra);
+        await uploaderBot.uploadVideo({
+            
+        }, episodeExtra);
     }
     // await databaseBot.updateDatabase();
 }

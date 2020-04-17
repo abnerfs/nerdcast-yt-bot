@@ -4,20 +4,20 @@ dotenv.config();
 
 import { databaseBot } from "./bots/database";
 import { downloaderBot } from "./bots/downloader";
-import { botRenderer } from "./bots/renderer";
+import { rendererBot } from "./bots/renderer";
 import { uploaderBot } from './bots/uploader';
+import { infoBot } from './bots/info';
 
 const start = async () => {
     console.log('App inicializado');
     // await uploaderBot.startLoginServer();
     
-    const episode = databaseBot.getEpisode(395408);
-    if(episode) {
-        const episodeExtra = await downloaderBot.downloadAssets(episode);
-        await botRenderer.renderVideo(episodeExtra);
-        await uploaderBot.uploadVideo({
-            
-        }, episodeExtra);
+    const podcast = databaseBot.getPodcast(395054);
+    if(podcast) {
+        const info = await infoBot.getPodcastInfo(podcast);
+        const assets = await downloaderBot.downloadAssets(info);
+        await rendererBot.renderVideo(assets);
+
     }
     // await databaseBot.updateDatabase();
 }

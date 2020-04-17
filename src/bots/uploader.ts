@@ -77,6 +77,15 @@ const startLoginServer = () =>
     });
 });
 
+export type videoUploadInfo = {
+    title: string;
+    description: string;
+    tags: string;
+    auth: APIAuth;
+    privacy: 'public' | 'private';
+    videoPath: string;
+}
+
 const uploadVideo = async (auth: APIAuth, podcastExtra: PodcastExtra) => {
     Youtube.authenticate({
         type: 'oauth',

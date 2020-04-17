@@ -60,3 +60,11 @@ export interface Thumbnails {
     "img-4x6-448x644":   string;
     "img-1x1-3000x3000": string;
 }
+
+export interface APIAuth {
+    access_token:  string;
+    expires_in:    number;
+    token_type:    string;
+    scope:         string;
+    refresh_token: string;
+}

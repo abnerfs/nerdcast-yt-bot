@@ -14,7 +14,7 @@ const renderVideo = async (podcast : PodcastExtra) => {
             .input(podcast.imagePath)
             .inputFPS(1)
             .loop(podcast.podcast.duration)
-            .outputFPS(30)
+            .outputFPS(1)
             .audioCodec('libmp3lame')
             .videoCodec('libx264')
             .size('1280x720')

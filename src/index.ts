@@ -14,8 +14,11 @@ const start = async () => {
     // await uploaderBot.startLoginServer();
     // return;
 
+    await databaseBot.updateDatabase();
+
     for (const podcast of databaseBot.listPodcastsNotUploaded()) {
         if (podcast) {
+            console.log(podcast.title);
             const info = await infoBot.getPodcastInfo(podcast);
             const assets = await downloaderBot.downloadAssets(info);
             await rendererBot.renderVideo(assets);
@@ -27,12 +30,12 @@ const start = async () => {
 
             console.log(videoinfo);
             await uploaderBot.uploadVideo({
+               
                 }, videoinfo);
 
             await databaseBot.setUploaded(podcast);
         }
     }
-    await databaseBot.updateDatabase();
 }
 
 start()

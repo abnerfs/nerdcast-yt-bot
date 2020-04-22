@@ -5,8 +5,18 @@ import path from 'path';
 import Sharp from 'sharp';
 
 
+function encodefileNameURL(url: string) {
+    let pathurl = url.split('/');
+    let fileName = pathurl.pop() || '';
+    const newUrl = pathurl.join('/') + '/' + encodeURIComponent(fileName);
+    return newUrl;
+}
+
+
 function downloadFile(url: string, dest: string) {
-    return fetch.default(url)
+    const urlParsed = encodefileNameURL(url);
+
+    return fetch.default(urlParsed)
         .then((res) => {
             const fileStream = fs.createWriteStream(dest);
             return new Promise((resolve, reject) => {

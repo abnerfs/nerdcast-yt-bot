@@ -1,7 +1,6 @@
-import { PodcastVideo } from "../models";
+import { PodcastVideo } from "../models/podcast";
 
-
-const getVideoInfo = (resultVideoPath: string, rawTitle: string, rawDescription: string) : PodcastVideo => {
+export const getVideoInfo = (resultVideoPath: string, rawTitle: string, rawDescription: string) : PodcastVideo  => {
 
     const description = 
            rawDescription
@@ -24,6 +23,3 @@ const getVideoInfo = (resultVideoPath: string, rawTitle: string, rawDescription:
     }
 }
 
-export const videoInfoBot = {
-    getVideoInfo
-}

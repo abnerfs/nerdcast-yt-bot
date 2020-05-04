@@ -4,7 +4,6 @@ const PORT = process.env.PORT || 1122;
 
 import fetch from 'node-fetch';
 import express from 'express';
-import { APIAuth, PodcastVideo } from '../models';
 import open from 'open';
 const Youtube = require('youtube-api');
 import fs from 'fs';
@@ -15,10 +14,11 @@ if(!SERVER_URI)
 const REDIRECT_URI = SERVER_URI + '/callback';
 
 import queryString from 'query-string';
+import { APIAuth, PodcastVideo } from '../models/podcast';
 
 
-const startLoginServer = () => 
-    new Promise((resolve, reject) => {
+export const startLoginServer = () => 
+    new Promise<APIAuth>((resolve, reject) => {
     const app = express();
 
     app.get('/login', (req: express.Request, res: express.Response) => {
@@ -83,7 +83,7 @@ export type videoUploadInfo = {
     videoPath: string;
 }
 
-const uploadVideo = async (auth: APIAuth, videoInfo: PodcastVideo) => {
+export const uploadVideo = async (auth: APIAuth, videoInfo: PodcastVideo) => {
     console.log('Uploading video...');
     Youtube.authenticate({
         type: 'oauth',
@@ -93,7 +93,6 @@ const uploadVideo = async (auth: APIAuth, videoInfo: PodcastVideo) => {
     return new Promise((resolve, reject) => {
         Youtube.videos.insert({
             "resource": {
-                // Video title and description
                 "snippet": {
                     "title": videoInfo.title,
                     "description": videoInfo.description,
@@ -118,13 +117,4 @@ const uploadVideo = async (auth: APIAuth, videoInfo: PodcastVideo) => {
         });
     });
 }
-
-export const uploaderBot = {
-    startLoginServer,
-    uploadVideo
-}
-
-
-
-
 

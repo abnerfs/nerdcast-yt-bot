@@ -1,47 +1,52 @@
-// import { databaseBot } from "./bots/database";
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { databaseBot } from "./bots/database";
-import { downloaderBot } from "./bots/downloader";
-import { rendererBot } from "./bots/renderer";
-import { uploaderBot } from './bots/uploader';
-import { infoBot } from './bots/info';
-import { videoInfoBot } from './bots/videoinfo';
+import { renderVideo } from "./bots/renderer";
+import { createTables, openDB, getNotUploaded, setUploaded } from './services/storage';
+import { updatePodcasts } from './services/podcasts';
+import { PodcastAssetLink } from './models/podcast';
+import { getAssetsNerdcast } from './services/nerdcast';
+import { downloadAssets } from './bots/downloader';
+import { getVideoInfo } from './bots/videoinfo';
+import { uploadVideo, startLoginServer } from './bots/uploader';
 
 const start = async () => {
     console.log('App inicializado');
-    // await uploaderBot.startLoginServer();
-    // return;
+    const auth = await startLoginServer();
+    console.log(auth);
 
-    await databaseBot.updateDatabase();
+    const db = await openDB();
+    try {
+        await createTables(db);
+        await updatePodcasts(db);
 
-    for (const podcast of databaseBot.listPodcastsNotUploaded()) {
-        if (podcast) {
+        while (true) {
+            const podcast = await getNotUploaded(db);
+            if (!podcast)
+                break;
+
             console.log(podcast.title);
-            const info = await infoBot.getPodcastInfo(podcast);
-            const assets = await downloaderBot.downloadAssets(info);
-            await rendererBot.renderVideo(assets);
-            const videoinfo = videoInfoBot.getVideoInfo(
-                assets.resultPath,
-                `${podcast.product_name} ${podcast.episode} - ${podcast.title} (Com imagens)`,
-                podcast.description
-                +'\r\nProduzido por Jovem Nerd, todos os direitos reservados: ' + podcast.url);
 
-            console.log(videoinfo);
-            await uploaderBot.uploadVideo({
-               
-                }, videoinfo);
+            let assetLinks: PodcastAssetLink[] = [];
+            if (podcast.podcast_type === 'Nerdcast')
+                assetLinks = await getAssetsNerdcast(podcast);
 
-            await databaseBot.setUploaded(podcast);
+            const assetFiles = await downloadAssets(assetLinks);
+            const resultPath = await renderVideo(podcast, assetFiles);
+            const info = getVideoInfo(resultPath, podcast.title, podcast.description);
+
+            await uploadVideo(auth, info);
+
+            await setUploaded(db, podcast.id);
         }
+
+    }
+    finally {
+        db.close();
     }
 }
 
 start()
     .then(() => {
         console.log('App ended');
-    })
-    .catch((err: Error) => {
-        console.log(`App Error: ${err.message}, ${err.stack}`);
     })

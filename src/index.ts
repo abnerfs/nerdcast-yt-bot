@@ -34,7 +34,7 @@ const start = async () => {
             const assetFiles = await downloadAssets(assetLinks);
             const resultPath = await renderVideo(podcast, assetFiles);
             const info = getVideoInfo(resultPath, podcast.title, podcast.description);
-
+            console.log(info);
             await uploadVideo(auth, info);
 
             await setUploaded(db, podcast.id);

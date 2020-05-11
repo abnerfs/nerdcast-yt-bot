@@ -64,7 +64,7 @@ export const setUploaded = (db: sqlite3.Database, id: number) => {
     return execQuery(db, query, [id]);
 }
 
-export const getNotUploaded = async (db: sqlite3.Database) => {
-    const query = `SELECT * FROM podcasts WHERE Uploaded = 0 ORDER BY publish_date DESC, insert_date DESC LIMIT 1`
-    return ((await getResults(db, query, [])) as [Podcast | undefined])[0]
+export const getNotUploaded = async (db: sqlite3.Database, id?: number) => {
+    const query = `SELECT * FROM podcasts WHERE Uploaded = 0 ${id ? 'AND id = ?' : ''}  ORDER BY publish_date DESC, insert_date DESC LIMIT 1`
+    return ((await getResults(db, query, [id])) as [Podcast | undefined])[0]
 }
